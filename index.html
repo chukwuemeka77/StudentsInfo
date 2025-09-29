@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebDev Class Registration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
+    }
+    input, button {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>WebDev Class Registration</h2>
+    <input type="text" id="studentName" placeholder="Enter your name" required>
+    <input type="date" id="joinDate" required>
+    <button onclick="submitForm()">Send</button>
+    <p id="responseMessage"></p>
+  </div>
+
+  <script>
+    const scriptURL = "YOUR_GOOGLE_SCRIPT_URL"; // Replace with your Apps Script URL
+
+    async function submitForm() {
+      const name = document.getElementById("studentName").value;
+      const date = document.getElementById("joinDate").value;
+      const responseMessage = document.getElementById("responseMessage");
+
+      if (name === "" || date === "") {
+        responseMessage.textContent = "Please fill all fields.";
+        responseMessage.className = "error";
+        return;
+      }
+
+      try {
+        const res = await fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify({ studentName: name, joinDate: date }),
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        responseMessage.textContent = data.message;
+        responseMessage.className = "success";
+        document.getElementById("studentName").value = "";
+        document.getElementById("joinDate").value = "";
+      } catch (error) {
+        responseMessage.textContent = "Error submitting form.";
+        responseMessage.className = "error";
+      }
+    }
+  </script>
+</body>
+      </html>
