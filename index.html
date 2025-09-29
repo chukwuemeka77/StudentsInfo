@@ -2,90 +2,140 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebDev Class Registration</title>
+  <title>WebDev Student Registration</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f9;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background: #f4f4f9;
+      margin: 0;
     }
+
     .container {
       background: white;
-      padding: 25px;
-      border-radius: 12px;
+      padding: 20px 25px;
+      border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      width: 350px;
+      width: 300px;
       text-align: center;
     }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
     input, button {
-      width: 90%;
+      width: 100%;
       padding: 10px;
       margin: 8px 0;
-      border-radius: 8px;
       border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
     }
+
     button {
-      background: #007BFF;
+      background: #007bff;
       color: white;
       border: none;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
-    button:hover {
+
+    button:hover:enabled {
       background: #0056b3;
     }
-    .success {
-      color: green;
-      margin-top: 10px;
+
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
     }
-    .error {
-      color: red;
-      margin-top: 10px;
+
+    /* Toast styles */
+    .toast {
+      visibility: hidden;
+      min-width: 200px;
+      margin-left: -100px;
+      background: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.5s, bottom 0.5s;
     }
+
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+      bottom: 50px;
+    }
+
+    .toast.success { background: #28a745; }
+    .toast.error { background: #dc3545; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>WebDev Class Registration</h2>
-    <input type="text" id="studentName" placeholder="Enter your name" required>
-    <input type="date" id="joinDate" required>
-    <button onclick="submitForm()">Send</button>
-    <p id="responseMessage"></p>
+    <h2>WebDev Registration</h2>
+    <form id="studentForm">
+      <input type="text" id="studentName" placeholder="Enter your name" required>
+      <input type="date" id="joinDate" required>
+      <button type="submit" id="submitBtn">Submit</button>
+    </form>
   </div>
 
+  <!-- Toast message -->
+  <div id="toast"></div>
+
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycby4A-2fkp7lg2byAmrq1mLmKqyZK2oFEjxj6gQosstk1Yde44JG8NQxsNJ8_Cu-BFq6fA/exec"; // Replace with your Apps Script URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycby4A-2fkp7lg2byAmrq1mLmKqyZK2oFEjxj6gQosstk1Yde44JG8NQxsNJ8_Cu-BFq6fA/exec"; // replace with your Apps Script /exec URL
+    const submitBtn = document.getElementById("submitBtn");
 
-    async function submitForm() {
-      const name = document.getElementById("studentName").value;
-      const date = document.getElementById("joinDate").value;
-      const responseMessage = document.getElementById("responseMessage");
+    const showToast = (message, type = "success") => {
+      const toast = document.getElementById("toast");
+      toast.className = "toast " + type + " show";
+      toast.textContent = message;
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    };
 
-      if (name === "" || date === "") {
-        responseMessage.textContent = "Please fill all fields.";
-        responseMessage.className = "error";
-        return;
-      }
+    document.getElementById("studentForm").addEventListener("submit", function(e) {
+      e.preventDefault();
 
-      try {
-        const res = await fetch(scriptURL, {
-          method: "POST",
-          body: JSON.stringify({ studentName: name, joinDate: date }),
-          headers: { "Content-Type": "application/json" },
-        });
-        const data = await res.json();
-        responseMessage.textContent = data.message;
-        responseMessage.className = "success";
-        document.getElementById("studentName").value = "";
-        document.getElementById("joinDate").value = "";
-      } catch (error) {
-        responseMessage.textContent = "Error submitting form.";
-        responseMessage.className = "error";
-      }
-    }
+      // Loading state
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({
+          studentName: document.getElementById("studentName").value,
+          joinDate: document.getElementById("joinDate").value
+        }),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast(data.message, "success");
+        document.getElementById("studentForm").reset();
+      })
+      .catch(err => {
+        showToast("Error submitting form.", "error");
+        console.error(err);
+      })
+      .finally(() => {
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+      });
+    });
   </script>
 </body>
-      </html>
+    </html>
