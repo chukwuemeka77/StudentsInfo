@@ -96,7 +96,7 @@
   <div id="toast"></div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycby4A-2fkp7lg2byAmrq1mLmKqyZK2oFEjxj6gQosstk1Yde44JG8NQxsNJ8_Cu-BFq6fA/exec"; // replace with your Apps Script /exec URL
+    const scriptURL = "PASTE_YOUR_DEPLOYED_SCRIPT_URL_HERE"; // replace with your Apps Script /exec URL
     const submitBtn = document.getElementById("submitBtn");
 
     const showToast = (message, type = "success") => {
@@ -115,15 +115,16 @@
 
       fetch(scriptURL, {
         method: "POST",
+        mode: "no-cors", // 👈 bypasses CORS
         body: JSON.stringify({
           studentName: document.getElementById("studentName").value,
           joinDate: document.getElementById("joinDate").value
         }),
         headers: { "Content-Type": "application/json" }
       })
-      .then(res => res.json())
-      .then(data => {
-        showToast(data.message, "success");
+      .then(() => {
+        // With no-cors we can’t read backend’s response, so we just assume success
+        showToast("Recorded successfully!", "success");
         document.getElementById("studentForm").reset();
       })
       .catch(err => {
@@ -138,4 +139,4 @@
     });
   </script>
 </body>
-    </html>
+</html>
